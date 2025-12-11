@@ -14,8 +14,7 @@ namespace Auth_Ex_Identity.Models.Entity
         public string Name { get; set; }
         [Required]
         public string Surname { get; set; }
-        [Required]
-        public string UserName { get; set; }
+
 
         public string Gender { get; set; }
 

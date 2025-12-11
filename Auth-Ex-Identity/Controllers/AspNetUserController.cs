@@ -2,6 +2,7 @@
 using Auth_Ex_Identity.Models.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth_Ex_Identity.Controllers
@@ -107,12 +108,12 @@ namespace Auth_Ex_Identity.Controllers
                     }
                     else
                     {
-                     
+
                         foreach (var error in result.Errors)
                         {
                             ModelState.AddModelError(string.Empty, error.Description);
                         }
-                    
+
                     }
                 }
             }
@@ -122,5 +123,49 @@ namespace Auth_Ex_Identity.Controllers
             }
             return View("Register");
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginRequest(LoginRequest login)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    AppUser user = await this._userManager.FindByEmailAsync(login.Email);
+
+                    if (user is not null)
+                    {
+                        Microsoft.AspNetCore.Identity.SignInResult result = await this._signInManager.PasswordSignInAsync(
+                            user,
+                            login.Password,
+                            isPersistent: false,
+                            lockoutOnFailure: false
+                            );
+
+                        if (result.Succeeded)
+                        {
+                            return RedirectToAction("Index", "Home");
+                        }
+
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return View("Login");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
+
     }
 }
